@@ -118,12 +118,39 @@ public class RedisExecoter<K extends Serializable,V> {
     }
 
     /**
-     * hash循环设置属性
+     * hash设置属性
      * @param key
      * @param propertiesMap
      */
-    public <K extends Serializable, HK, HV> void hashPut(K key, Map<HK,HV> propertiesMap) {
+    public <K extends Serializable, HK, HV> void hashPut(K key, Map<HK,HV> propertiesMap, Long expire) {
         template.opsForHash().putAll(key,propertiesMap);
+        if (expire != null)
+            template.expire(key, expire,TimeUnit.SECONDS);
+    }
+
+    /**
+     * hash设置属性
+     * @param key
+     * @param hashKey
+     * @param hashValue
+     * @param <K>
+     * @param <HK>
+     * @param <HV>
+     */
+    public <K extends Serializable, HK, HV> void hashPut(K key, HK hashKey, HV hashValue) {
+        template.opsForHash().put(key,hashKey,hashValue);
+    }
+
+    /**
+     * hash获取散列单个属性
+     * @param key
+     * @param hashKey
+     * @param <HK>
+     * @return
+     */
+    public <HK, HV> HV hashGet(K key, HK hashKey) {
+        HV hashValue = (HV) template.opsForHash().get(key, hashKey);
+        return hashValue;
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.hyq.cache.redis.core.dto;
+package com.hyq.cache.redis.dao.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArticleDTO implements Serializable {
+public class ArticleDTO extends BaseDTO implements Serializable {
 
     /**
      * 文章id
@@ -30,4 +30,13 @@ public class ArticleDTO implements Serializable {
      * 创建时间
      */
     private Date creatTime;
+
+    public static ArticleDTO defaultValue(Long id) {
+
+        return ArticleDTO.builder()
+                .id(id)
+                .tile("标题" + id)
+                .creatTime(new Date())
+                .build();
+    }
 }

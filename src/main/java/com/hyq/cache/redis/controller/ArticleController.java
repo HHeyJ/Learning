@@ -3,13 +3,13 @@ package com.hyq.cache.redis.controller;
 import com.hyq.cache.redis.core.enums.ErrorEnum;
 import com.hyq.cache.redis.core.result.Result;
 import com.hyq.cache.redis.core.service.article.ArticleService;
+import com.hyq.cache.redis.dao.dto.ArticleDTO;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author nanke
@@ -22,34 +22,34 @@ import java.util.Map;
  *  5、自动生成文章
  */
 @RestController
-public class ArticleController {
+public class ArticleController extends BaseController {
 
     @Resource
     private ArticleService articleService;
 
     @RequestMapping("/creatArticle")
-    public Result<Long> creatArticle() {
+    public Result<ArticleDTO> creatArticle() {
 
-        Long id = articleService.creatArticle();
-        return Result.buildSuccess(id);
+        ArticleDTO articleDTO = articleService.creatArticle(getUserInfo().getUserId());
+        return Result.buildSuccess(articleDTO);
     }
 
     @RequestMapping("/articleByScore")
-    public Result<List<Map<Object,Object>>> articleByScore(@RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+    public Result<List<ArticleDTO>> articleByScore(@RequestParam Integer pageNo, @RequestParam Integer pageSize) {
 
         return Result.buildSuccess(articleService.queryAriticle(1,pageNo,pageSize));
     }
 
     @RequestMapping("/articleByTime")
-    public Result<List<Map<Object,Object>>> articleByTime(@RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+    public Result<List<ArticleDTO>> articleByTime(@RequestParam Integer pageNo, @RequestParam Integer pageSize) {
 
         return Result.buildSuccess(articleService.queryAriticle(2,pageNo,pageSize));
     }
 
     @RequestMapping("/like")
-    public Result<Boolean> likeArticle(@RequestParam Long cuserId, @RequestParam Long articleId) {
+    public Result<Boolean> likeArticle(@RequestParam Long articleId) {
 
-        Boolean aBoolean = articleService.likeArticle(cuserId, articleId);
+        Boolean aBoolean = articleService.likeArticle(getUserInfo().getUserId(), articleId);
         return aBoolean ? Result.buildSuccess(true) : Result.buildFail(ErrorEnum.LIKE_FAIL);
     }
 

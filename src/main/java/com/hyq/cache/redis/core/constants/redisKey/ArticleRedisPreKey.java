@@ -1,10 +1,10 @@
-package com.hyq.cache.redis.core.constants;
+package com.hyq.cache.redis.core.constants.redisKey;
 
 /**
  * @author nanke
  * @date 2020/3/19 下午8:10
  */
-public interface RedisPreKey {
+public interface ArticleRedisPreKey {
 
     /**
      * 文章合集 - 用户评分倒序

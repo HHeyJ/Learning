@@ -1,8 +1,10 @@
 package com.hyq.cache.redis.core.service.article;
 
 import com.hyq.cache.redis.core.common.RedisExecoter;
-import com.hyq.cache.redis.core.constants.RedisPreKey;
+import com.hyq.cache.redis.core.constants.redisKey.ArticleRedisPreKey;
 import com.hyq.cache.redis.core.constants.TimeConstant;
+import com.hyq.cache.redis.dao.dto.ArticleDTO;
+import com.hyq.cache.redis.dao.dto.BaseDTO;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -18,28 +20,25 @@ public class ArticleService {
     @Resource
     private RedisExecoter redisExecoter;
 
-    private static final List<String> hashKeys = Arrays.asList("title", "id", "content");
-
     /**
      * 新建一篇文章
      * @return
      */
-    public Long creatArticle() {
+    public ArticleDTO creatArticle(Long userId) {
         // TODO Lua脚本设置
         // 假装是拿总数吧🤷
-        Long id = redisExecoter.zCount(RedisPreKey.articleKey, Integer.MIN_VALUE, Integer.MAX_VALUE) + 1;
+        Long id = redisExecoter.zCount(ArticleRedisPreKey.articleKey, Integer.MIN_VALUE, Integer.MAX_VALUE) + 1;
         // 文章评分有序集合
-        redisExecoter.zSet(RedisPreKey.articleKey,id,0L,null);
+        redisExecoter.zSet(ArticleRedisPreKey.articleKey,id,0L,null);
         // 文章创建时间有序集合
-        redisExecoter.zSet(RedisPreKey.articleTimeKey,id,System.currentTimeMillis(),null);
+        redisExecoter.zSet(ArticleRedisPreKey.articleTimeKey,id,System.currentTimeMillis(),null);
         // 文章的投票粉丝列表 - 文章投稿者禁止给自己点赞
-        Long cuserId = 1L;
-        redisExecoter.sSet(RedisPreKey.getArticleFansListKey(id),cuserId, TimeConstant.sevenDaySec);
+        redisExecoter.sSet(ArticleRedisPreKey.getArticleFansListKey(id),userId, TimeConstant.sevenDaySec);
         // 循环设置属性
-        Map<String,Object> properties = new HashMap<>();
-        hashKeys.forEach(hashKey -> properties.put(hashKey,hashKey + "-" + id));
-        redisExecoter.hashPut(RedisPreKey.getArticlePropertiesKey(id),properties);
-        return id;
+        ArticleDTO articleDTO = ArticleDTO.defaultValue(id);
+        HashMap<String, Object> conver = ArticleDTO.conver(articleDTO);
+        redisExecoter.hashPut(ArticleRedisPreKey.getArticlePropertiesKey(id),conver,null);
+        return articleDTO;
     }
 
     /**
@@ -49,14 +48,18 @@ public class ArticleService {
      * @param pageSize
      * @return
      */
-    public List<Map<Object,Object>> queryAriticle(Integer type, Integer pageNo, Integer pageSize) {
+    public List<ArticleDTO> queryAriticle(Integer type, Integer pageNo, Integer pageSize) {
+        String cacheKey = ArticleRedisPreKey.getArticleKeyByType(type);
         // 分页查id
-        Set<Long> articleIds = redisExecoter.zGet(RedisPreKey.getArticleKeyByType(type), pageNo, pageSize);
+        Set<Long> articleIds = redisExecoter.zGet(cacheKey, pageNo, pageSize);
         // 获取散列属性
-        List<Map<Object,Object>> result = new ArrayList<>();
+        List<ArticleDTO> result = new ArrayList<>();
         articleIds.forEach(id -> {
-            Map<Object, Object> map = redisExecoter.hashGet(RedisPreKey.getArticlePropertiesKey(id), new ArrayList<>(hashKeys));
-            result.add(map);
+
+            Map<String, Object> map = redisExecoter.hashGet(ArticleRedisPreKey.getArticlePropertiesKey(id), BaseDTO.conver(ArticleDTO.class));
+            Object conver = ArticleDTO.conver(map, ArticleDTO.class);
+            if (conver != null)
+                result.add((ArticleDTO) conver);
         });
         return result;
     }
@@ -70,14 +73,14 @@ public class ArticleService {
     public Boolean likeArticle(Long cuserId, Long article) {
 
         // 文章创建是否超过一周
-        Long creatTime = redisExecoter.zGetScore(RedisPreKey.articleTimeKey, article);
+        Long creatTime = redisExecoter.zGetScore(ArticleRedisPreKey.articleTimeKey, article);
         if (System.currentTimeMillis() - creatTime > TimeConstant.sevenDaySec * 1000L)
             return false;
         // 文章点赞人添加
-        Long aLong = redisExecoter.sSet(RedisPreKey.getArticleFansListKey(article), cuserId, TimeConstant.sevenDaySec);
+        Long aLong = redisExecoter.sSet(ArticleRedisPreKey.getArticleFansListKey(article), cuserId, TimeConstant.sevenDaySec);
         if (!aLong.equals(0L))
             // 文章评分列表成绩 +1
-            redisExecoter.zIncrby(RedisPreKey.articleKey,article,1L);
+            redisExecoter.zIncrby(ArticleRedisPreKey.articleKey,article,1L);
         return !aLong.equals(0L);
     }
 
