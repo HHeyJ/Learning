@@ -3,17 +3,14 @@ package com.hyq.cache.redis.core.common;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author nanke
  * @date 2020/3/19 下午5:36
  */
-public class RedisExecoter {
+public class RedisExecoter<K extends Serializable,V> {
 
     private RedisTemplate<Serializable,Object> template;
 
@@ -27,7 +24,7 @@ public class RedisExecoter {
      * @param value
      * @param expire
      */
-    public <T extends Object> void kvSet(String key, T value, Long expire) {
+    public void kvSet(K key, V value, Long expire) {
         template.opsForValue().set(key,value);
         if (expire != null)
             template.expire(key, expire,TimeUnit.SECONDS);
@@ -38,8 +35,8 @@ public class RedisExecoter {
      * @param key
      * @return
      */
-    public <T extends Object> T kvGet(String key) {
-        return (T) template.opsForValue().get(key);
+    public V kvGet(K key) {
+        return (V) template.opsForValue().get(key);
     }
 
     /**
@@ -47,9 +44,8 @@ public class RedisExecoter {
      * @param key
      * @param value
      * @param expire
-     * @param <T>
      */
-    public <T extends Object> Long sSet(String key, T value, Long expire) {
+    public Long sSet(K key, V value, Long expire) {
         // TODO Lua脚本设置
         Boolean hasKey = template.hasKey(key);
         hasKey = hasKey == null ? false : hasKey;
@@ -62,10 +58,9 @@ public class RedisExecoter {
     /**
      * set无序集合获取
      * @param key
-     * @param <T>
      */
-    public <T extends Object> Set<T> sGet(String key) {
-        return (Set<T>) template.opsForSet().members(key);
+    public Set<V> sGet(K key) {
+        return (Set<V>) template.opsForSet().members(key);
     }
 
     /**
@@ -73,9 +68,8 @@ public class RedisExecoter {
      * @param key
      * @param value
      * @param expire
-     * @param <T>
      */
-    public <T extends Object> void zSet(String key, T value, Long score, Long expire) {
+    public void zSet(K key, V value, Long score, Long expire) {
         template.opsForZSet().add(key,value,score);
         if (expire != null)
             template.expire(key, expire,TimeUnit.SECONDS);
@@ -86,10 +80,9 @@ public class RedisExecoter {
      * @param key
      * @param pageNo
      * @param pageSize
-     * @param <T>
      */
-    public <T extends Object> Set<T> zGet(String key, Integer pageNo, Integer pageSize) {
-        return (Set<T>) template.opsForZSet().reverseRange(key, (pageNo - 1) * pageSize, pageNo * pageSize - 1);
+    public Set<V> zGet(K key, Integer pageNo, Integer pageSize) {
+        return (Set<V>) template.opsForZSet().reverseRange(key, (pageNo - 1) * pageSize, pageNo * pageSize - 1);
     }
 
     /**
@@ -99,7 +92,7 @@ public class RedisExecoter {
      * @param max
      * @return
      */
-    public Long zCount(String key, double min, double max) {
+    public Long zCount(K key, double min, double max) {
         return template.opsForZSet().count(key,min,max);
     }
 
@@ -107,10 +100,9 @@ public class RedisExecoter {
      * zSet获取对象成绩
      * @param key
      * @param obj
-     * @param <T>
      * @return
      */
-    public <T extends Object> Long zGetScore(String key, T obj) {
+    public Long zGetScore(K key, V obj) {
         return template.opsForZSet().score(key,obj).longValue();
     }
 
@@ -119,10 +111,9 @@ public class RedisExecoter {
      * @param key
      * @param obj
      * @param score
-     * @param <T>
      * @return
      */
-    public <T extends Object> Long zIncrby(String key, T obj, Long score) {
+    public Long zIncrby(K key, V obj, Long score) {
         return template.opsForZSet().incrementScore(key,obj,score).longValue();
     }
 
@@ -131,21 +122,20 @@ public class RedisExecoter {
      * @param key
      * @param propertiesMap
      */
-    public <T extends Object> void hashPut(String key, Map<Object,T> propertiesMap) {
-        propertiesMap.entrySet().forEach(hashEntry ->
-                template.opsForHash().putIfAbsent(key,hashEntry.getKey(),hashEntry.getValue()));
+    public <K extends Serializable, HK, HV> void hashPut(K key, Map<HK,HV> propertiesMap) {
+        template.opsForHash().putAll(key,propertiesMap);
     }
 
     /**
      * hash获取散列所有属性
      * @param key
      * @param hashKeys
-     * @param <T>
+     * @param <HK>
      * @return
      */
-    public <T extends Object> Map<Object,T> hashGet(String key, List<Object> hashKeys) {
-        Map<Object,T> propertiesMap = new HashMap<>();
-        List<T> hashValues = (List<T>) template.opsForHash().multiGet(key, hashKeys);
+    public <HK, HV> Map<HK, HV> hashGet(K key, List<HK> hashKeys) {
+        Map<HK, HV> propertiesMap = new HashMap<>();
+        List<HV> hashValues = (List<HV>) template.opsForHash().multiGet(key, (Collection<Object>) hashKeys);
 
         for (int i = 0; i < hashKeys.size(); i++) {
             propertiesMap.put(hashKeys.get(i),hashValues.get(i));

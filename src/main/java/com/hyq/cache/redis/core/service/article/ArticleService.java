@@ -18,7 +18,7 @@ public class ArticleService {
     @Resource
     private RedisExecoter redisExecoter;
 
-    private static final List<Object> hashKeys = Arrays.asList("title", "id", "content");
+    private static final List<String> hashKeys = Arrays.asList("title", "id", "content");
 
     /**
      * 新建一篇文章
@@ -36,7 +36,7 @@ public class ArticleService {
         Long cuserId = 1L;
         redisExecoter.sSet(RedisPreKey.getArticleFansListKey(id),cuserId, TimeConstant.sevenDaySec);
         // 循环设置属性
-        Map<Object,Object> properties = new HashMap<>();
+        Map<String,Object> properties = new HashMap<>();
         hashKeys.forEach(hashKey -> properties.put(hashKey,hashKey + "-" + id));
         redisExecoter.hashPut(RedisPreKey.getArticlePropertiesKey(id),properties);
         return id;
@@ -55,7 +55,7 @@ public class ArticleService {
         // 获取散列属性
         List<Map<Object,Object>> result = new ArrayList<>();
         articleIds.forEach(id -> {
-            Map<Object, Object> map = redisExecoter.hashGet(RedisPreKey.getArticlePropertiesKey(id), hashKeys);
+            Map<Object, Object> map = redisExecoter.hashGet(RedisPreKey.getArticlePropertiesKey(id), new ArrayList<>(hashKeys));
             result.add(map);
         });
         return result;
@@ -71,7 +71,7 @@ public class ArticleService {
 
         // 文章创建是否超过一周
         Long creatTime = redisExecoter.zGetScore(RedisPreKey.articleTimeKey, article);
-        if (System.currentTimeMillis() - creatTime > TimeConstant.sevenDaySec)
+        if (System.currentTimeMillis() - creatTime > TimeConstant.sevenDaySec * 1000L)
             return false;
         // 文章点赞人添加
         Long aLong = redisExecoter.sSet(RedisPreKey.getArticleFansListKey(article), cuserId, TimeConstant.sevenDaySec);
