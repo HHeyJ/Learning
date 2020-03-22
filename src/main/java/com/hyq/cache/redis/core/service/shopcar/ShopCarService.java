@@ -38,7 +38,6 @@ public class ShopCarService {
             return build;
         }
 
-        carItem = (String) redisExecoter.hashGet(cacheKey, itemId.toString());
         CarItemDTO carItemDTO = JSON.parseObject(carItem, CarItemDTO.class);
         carItemDTO.setItemNum(carItemDTO.getItemNum() + 1);
         redisExecoter.hashPut(cacheKey,itemId.toString(),JSON.toJSONString(carItemDTO));
