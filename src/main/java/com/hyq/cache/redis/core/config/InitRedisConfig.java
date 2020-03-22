@@ -3,19 +3,28 @@ package com.hyq.cache.redis.core.config;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.hyq.cache.redis.core.common.RedisExecoter;
 import com.hyq.cache.redis.core.common.SelfFastJsonSerializable;
+import com.hyq.cache.redis.core.listener.AllListener;
 import com.hyq.cache.redis.core.properties.RedisProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.Topic;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.JedisPoolConfig;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author nanke
@@ -26,6 +35,8 @@ public class InitRedisConfig {
 
     @Resource
     private RedisProperties redisProperties;
+    @Resource
+    private AllListener allListener;
 
     /**
      * 连接池配置类～
@@ -90,6 +101,24 @@ public class InitRedisConfig {
     public RedisExecoter redisExecoter(@Qualifier("template") RedisTemplate<Serializable,Object> template) {
 
         return new RedisExecoter(template);
+    }
+
+    /**
+     * 初始化订阅器
+     * @param connFactory
+     */
+    @Bean("container")
+    public RedisMessageListenerContainer container(@Qualifier("connFactory") JedisConnectionFactory connFactory) {
+
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(connFactory);
+        /**
+         * 订阅的TAG
+         */
+        Map<MessageListener, Collection<? extends Topic>> map = new HashMap<>();
+        map.put(allListener, Collections.singleton((new PatternTopic("*"))));
+        container.setMessageListeners(map);
+        return container;
     }
 
 }
