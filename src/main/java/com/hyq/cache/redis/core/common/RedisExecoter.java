@@ -19,6 +19,37 @@ public class RedisExecoter<K extends Serializable,V> {
     }
 
     /**
+     * key是否存在
+     * @param key
+     * @return
+     */
+    public Boolean hasKey(K key) {
+        return template.hasKey(key);
+    }
+
+    /**
+     * 散列Key是否存在
+     * @param key
+     * @param hashKey
+     * @param <HK>
+     * @return
+     */
+    public <HK> Boolean hashKey(K key, HK hashKey) {
+        return template.opsForHash().hasKey(key,hashKey);
+    }
+
+    /**
+     * 散列Key删除
+     * @param key
+     * @param hashKey
+     * @param <HK>
+     * @return
+     */
+    public <HK> Long deleteKey(K key, HK hashKey) {
+        return template.opsForHash().delete(key,hashKey);
+    }
+
+    /**
      * kv类型设置
      * @param key
      * @param value
@@ -168,6 +199,16 @@ public class RedisExecoter<K extends Serializable,V> {
             propertiesMap.put(hashKeys.get(i),hashValues.get(i));
         }
         return propertiesMap;
+    }
+
+    /**
+     * hash散列所有keys
+     * @param key
+     * @param <HV>
+     * @return
+     */
+    public <HV> Set<HV> hashKeys(K key) {
+        return (Set<HV>) template.opsForHash().keys(key);
     }
 
 
