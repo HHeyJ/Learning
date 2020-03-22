@@ -107,16 +107,6 @@ public class RedisExecoter<K extends Serializable,V> {
     }
 
     /**
-     * zSet按照成绩倒序分页
-     * @param key
-     * @param pageNo
-     * @param pageSize
-     */
-    public Set<V> zGet(K key, Integer pageNo, Integer pageSize) {
-        return (Set<V>) template.opsForZSet().reverseRange(key, (pageNo - 1) * pageSize, pageNo * pageSize - 1);
-    }
-
-    /**
      * zSet成绩范围内个数
      * @param key
      * @param min
@@ -125,6 +115,25 @@ public class RedisExecoter<K extends Serializable,V> {
      */
     public Long zCount(K key, double min, double max) {
         return template.opsForZSet().count(key,min,max);
+    }
+
+    /**
+     * zSet成员个数
+     * @param key
+     * @return
+     */
+    public Long zCard(K key) {
+        return template.opsForZSet().zCard(key);
+    }
+
+    /**
+     * zSet按照成绩倒序分页
+     * @param key
+     * @param pageNo
+     * @param pageSize
+     */
+    public Set<V> zGet(K key, Integer pageNo, Integer pageSize) {
+        return (Set<V>) template.opsForZSet().reverseRange(key, (pageNo - 1) * pageSize, pageNo * pageSize - 1);
     }
 
     /**
@@ -209,6 +218,16 @@ public class RedisExecoter<K extends Serializable,V> {
      */
     public <HV> Set<HV> hashKeys(K key) {
         return (Set<HV>) template.opsForHash().keys(key);
+    }
+
+    /**
+     * hash散列所有values
+     * @param key
+     * @param <HV>
+     * @return
+     */
+    public <HV> List<HV> hashValues(K key) {
+        return (List<HV>) template.opsForHash().values(key);
     }
 
 

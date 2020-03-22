@@ -74,10 +74,8 @@ public class ShopCarService {
         if (!redisExecoter.hasKey(cacheKey))
             return result;
 
-        Set<String> hashKeys = redisExecoter.hashKeys(cacheKey);
-        Map<String,String> itemsMap = redisExecoter.hashGet(cacheKey,new ArrayList<>(hashKeys));
-        itemsMap.entrySet().forEach(entry ->
-            result.add(JSON.parseObject(entry.getValue(),CarItemDTO.class)));
+        List<String> items = redisExecoter.hashValues(cacheKey);
+        items.forEach(item -> result.add(JSON.parseObject(item,CarItemDTO.class)));
         return result;
     }
 

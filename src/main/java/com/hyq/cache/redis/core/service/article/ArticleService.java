@@ -27,7 +27,7 @@ public class ArticleService {
     public ArticleDTO creatArticle(Long userId) {
         // TODO Lua脚本设置
         // 假装是拿总数吧🤷
-        Long id = redisExecoter.zCount(ArticleRedisPreKey.articleKey, Integer.MIN_VALUE, Integer.MAX_VALUE) + 1;
+        Long id = redisExecoter.zCard(ArticleRedisPreKey.articleKey) + 1;
         // 文章评分有序集合
         redisExecoter.zSet(ArticleRedisPreKey.articleKey,id,0L,null);
         // 文章创建时间有序集合
