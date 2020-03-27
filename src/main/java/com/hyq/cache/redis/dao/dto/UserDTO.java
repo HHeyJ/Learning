@@ -29,4 +29,8 @@ public class UserDTO extends BaseDTO {
      * 最近登录时间
      */
     private Date loginTime;
+    /**
+     * 钱包
+     */
+    private Integer money;
 }

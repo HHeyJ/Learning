@@ -56,4 +56,12 @@ public class Result<T> implements Serializable {
         result.setCode(error.code);
         return result;
     }
+
+    public static <T> Result<T> buildFail(String error) {
+        Result<T> result = new Result<>();
+        result.setStatus(false);
+        result.setMessage(error);
+        result.setCode(0);
+        return result;
+    }
 }

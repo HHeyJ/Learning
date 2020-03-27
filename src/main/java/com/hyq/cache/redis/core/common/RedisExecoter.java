@@ -1,6 +1,7 @@
 package com.hyq.cache.redis.core.common;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 
 import java.io.Serializable;
 import java.util.*;
@@ -95,6 +96,26 @@ public class RedisExecoter<K extends Serializable,V> {
     }
 
     /**
+     * set成员移除
+     * @param key
+     * @param value
+     * @return
+     */
+    public Long sRemove(K key, V value) {
+        return template.opsForSet().remove(key, value);
+    }
+
+    /**
+     * set是否存在该成员
+     * @param key
+     * @param value
+     * @return
+     */
+    public boolean sHasMember(K key, V value) {
+        return template.opsForSet().isMember(key,value);
+    }
+
+    /**
      * zSet有序集合设置
      * @param key
      * @param value
@@ -143,7 +164,8 @@ public class RedisExecoter<K extends Serializable,V> {
      * @return
      */
     public Long zGetScore(K key, V obj) {
-        return template.opsForZSet().score(key,obj).longValue();
+        Double score = template.opsForZSet().score(key, obj);
+        return score == null ? null : score.longValue();
     }
 
     /**
@@ -155,6 +177,16 @@ public class RedisExecoter<K extends Serializable,V> {
      */
     public Long zIncrby(K key, V obj, Long score) {
         return template.opsForZSet().incrementScore(key,obj,score).longValue();
+    }
+
+    /**
+     * zSet移除成员
+     * @param key
+     * @param obj
+     * @return
+     */
+    public Long zRemove(K key , V obj) {
+        return template.opsForZSet().remove(key,obj);
     }
 
     /**
@@ -179,6 +211,18 @@ public class RedisExecoter<K extends Serializable,V> {
      */
     public <K extends Serializable, HK, HV> void hashPut(K key, HK hashKey, HV hashValue) {
         template.opsForHash().put(key,hashKey,hashValue);
+    }
+
+    /**
+     * hash子属性自增
+     * @param key
+     * @param hashKey
+     * @param value
+     * @param <HK>
+     * @return
+     */
+    public <HK> Long hashIncr(K key, HK hashKey, Long value) {
+        return template.opsForHash().increment(key, hashKey, value);
     }
 
     /**
@@ -230,5 +274,12 @@ public class RedisExecoter<K extends Serializable,V> {
         return (List<HV>) template.opsForHash().values(key);
     }
 
-
+    /**
+     * 事物回调
+     * @param callback
+     * @return
+     */
+    public List<Object> transExec(SessionCallback callback) {
+        return (List<Object>) template.execute(callback);
+    }
 }
