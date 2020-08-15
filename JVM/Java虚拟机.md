@@ -366,50 +366,6 @@ CMS 等收集器的关注点是尽可能地缩短垃圾收集时用户线程所�
 
 > 如果在被线程内观察，所有操作都是有序的；如果在一个线程中观察另一个线程，所有操作都是无序的。前半句指“线程内表现为串行的语义”，后半句是指“指令重排”现象和“工作内存与主内存同步延迟”现象。Java 语言通过 volatile 和 synchronize 两个关键字来保证线程之间操作的有序性。volatile 自身就禁止指令重排，而 synchronize 则是由“一个变量在同一时刻指允许一条线程对其进行 lock 操作”这条规则获得，这条规则决定了持有同一个锁的两个同步块只能串行的进入。
 
-3.1.5 先行发生原则
-
-> 也就是 happens-before 原则。这个原则是判断数据是否存在竞争、线程是否安全的主要依据。先行发生是 Java 内存模型中定义的两项操作之间的偏序关系。
-
-天然的先行发生关系
-
-规则
-
-解释
-
-程序次序规则
-
-在一个线程内，代码按照书写的控制流顺序执行
-
-管程锁定规则
-
-一个 unlock 操作先行发生于后面对同一个锁的 lock 操作
-
-volatile 变量规则
-
-volatile 变量的写操作先行发生于后面对这个变量的读操作
-
-线程启动规则
-
-Thread 对象的 start() 方法先行发生于此线程的每一个动作
-
-线程终止规则
-
-线程中所有的操作都先行发生于对此线程的终止检测  
-(通过 Thread.join() 方法结束、 Thread.isAlive() 的返回值检测)
-
-线程中断规则
-
-对线程 interrupt() 方法调用优先发生于被中断线程的代码检测到中断事件的发生  
-(通过 Thread.interrupted() 方法检测)
-
-对象终结规则
-
-一个对象的初始化完成(构造函数执行结束)先行发生于它的 finalize() 方法的开始
-
-传递性
-
-如果操作 A 先于 操作 B 发生，操作 B 先于 操作 C 发生，那么操作 A 先于 操作 C
-
 ### 3.2 Java 与线程
 
 3.2.2 Java 线程调度
@@ -502,9 +458,7 @@ Thread 对象的 start() 方法先行发生于此线程的每一个动作
 4.  当虚拟机启动时，用户需指定一个要加载的主类(包含 main() 方法的那个类)，虚拟机会先初始化这个主类。
 5.  当使用 JDK 1.7 的动态语言支持时，如果一个 java.lang.invoke.MethodHandle 实例最后的解析结果 REF\_getStatic、REF\_putStatic、REF\_invokeStatic 的方法句柄，并且这个方法句柄所对应的类没有进行过初始化，则需先触发其初始化。
 
-前面的五种方式是对一个类的主动引用，除此之外，所有引用类的方法都不会触发初始化，佳作被动引用。举几个例子~
-
-    public class SuperClass {    static {        System.out.println("SuperClass init!");    }    public static int value = 1127;} public class SubClass extends SuperClass {    static {        System.out.println("SubClass init!");    }} public class ConstClass {    static {        System.out.println("ConstClass init!");    }    public static final String HELLOWORLD = "hello world!"} public class NotInitialization {    public static void main(String[] args) {        System.out.println(SubClass.value);        /**         *  output : SuperClass init!         *          * 通过子类引用父类的静态对象不会导致子类的初始化         * 只有直接定义这个字段的类才会被初始化         */         SuperClass[] sca = new SuperClass[10];        /**         *  output :          *          * 通过数组定义来引用类不会触发此类的初始化         * 虚拟机在运行时动态创建了一个数组类         */         System.out.println(ConstClass.HELLOWORLD);        /**         *  output :          *          * 常量在编译阶段会存入调用类的常量池当中，本质上并没有直接引用到定义类常量的类，         * 因此不会触发定义常量的类的初始化。         * “hello world” 在编译期常量传播优化时已经存储到 NotInitialization 常量池中了。         */    }}
+前面的五种方式是对一个类的主动引用，除此之外，所有引用类的方法都不会触发初始化
 
 6.2 类的加载过程
 
@@ -604,5 +558,3 @@ Thread 对象的 start() 方法先行发生于此线程的每一个动作
 
 除顶层启动类加载器之外，其他都有自己的父类加载器。  
 工作过程：如果一个类加载器收到一个类加载的请求，它首先不会自己加载，而是把这个请求委派给父类加载器。只有父类无法完成时子类才会尝试加载。
-
-6.3.2 破坏双亲委派模型
