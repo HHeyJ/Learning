@@ -8,6 +8,7 @@
         <module>Redis</module>
         <module>JVM</module>
         <module>PointOffer</module>
+        <module>Wx</module>
     </modules>
 
     <parent>
