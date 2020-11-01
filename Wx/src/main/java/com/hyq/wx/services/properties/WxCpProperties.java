@@ -2,6 +2,8 @@ package com.hyq.wx.services.properties;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.io.BaseEncoding;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.hyq.wx.services.constants.WxConstant;
 
 /**
@@ -12,6 +14,8 @@ import com.hyq.wx.services.constants.WxConstant;
  * 永远不要哭啼！永远不要说再见！永远不要说慌来伤害目己。
  */
 public class WxCpProperties {
+
+    public static final Gson GsonInstance = new GsonBuilder().create();
 
     /**
      * 获取请求URL路径

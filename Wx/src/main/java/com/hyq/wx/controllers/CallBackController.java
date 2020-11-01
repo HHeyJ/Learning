@@ -33,6 +33,7 @@ public class CallBackController {
     @RequestMapping("/cp")
     public void cpCallBack(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+        System.out.println("收到微信回调");
         String msgSignature = request.getParameter("msg_signature");
         String nonce = request.getParameter("nonce");
         String timestamp = request.getParameter("timestamp");
@@ -41,7 +42,7 @@ public class CallBackController {
         WxEncryDecryUtil cryptUtil = new WxEncryDecryUtil(WxConstant.CPConfig.token,WxConstant.CPConfig.encodingAesKey,WxConstant.CPConfig.corPid);
         if (!StringUtils.isEmpty(echostr)) {
             // 微信回调验签
-            if (wxCpService.checkSignature(msgSignature, timestamp, nonce, echostr)) {
+            if (!wxCpService.checkSignature(msgSignature, timestamp, nonce, echostr)) {
                 // 消息签名不正确，说明不是公众平台发过来的消息
                 response.getWriter().println("非法请求");
                 return;

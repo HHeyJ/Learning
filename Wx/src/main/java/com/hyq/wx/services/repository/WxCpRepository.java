@@ -4,7 +4,10 @@ import com.hyq.wx.services.WxCpService;
 import com.hyq.wx.services.constants.WxConstant;
 import com.hyq.wx.services.properties.WxCpProperties;
 import com.hyq.wx.services.rdto.cp.AccessTokenRDTO;
+import com.hyq.wx.services.rdto.cp.ClientGroupListRDTO;
 import com.hyq.wx.services.rdto.cp.ClientGroupRDTO;
+import com.hyq.wx.services.repository.wxrequest.ClientGroupListRequest;
+import com.hyq.wx.services.repository.wxrequest.ClientGroupRequest;
 import com.hyq.wx.services.util.http.WxHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -42,17 +45,19 @@ public class WxCpRepository {
 
     /**
      * 获取客户群列表
+     * 该接口用于获取配置过客户群管理的客户群列表。
      */
-    public void getClientGroupList() {
+    public ClientGroupListRDTO getClientGroupList() {
 
         // accessToken从缓存获取
         String accessToken = wxCpService.getAccessToken();
         // 完整请求路径
         String requestURL = WxCpProperties.getRequestURL(String.format(WxConstant.CPPath.ClientGroupListURL, accessToken));
         // json参数
-        String json = "";
-
-
+        ClientGroupListRequest request = new ClientGroupListRequest();
+        String json = WxCpProperties.GsonInstance.toJson(request);
+        String httpResult = WxHttpClient.post(requestURL, json);
+        return ClientGroupListRDTO.fromJson(httpResult);
     }
 
     /**
@@ -67,7 +72,9 @@ public class WxCpRepository {
         // 完整请求路径
         String requestURL = WxCpProperties.getRequestURL(String.format(WxConstant.CPPath.ClientGroupURL, accessToken));
         // json参数
-        String json = "{\"chat_id\":\"" + chatId +"\"}";
+        ClientGroupRequest request = new ClientGroupRequest();
+        request.setChatId(chatId);
+        String json = WxCpProperties.GsonInstance.toJson(request);
         // 发起网络请求
         String httpResult = WxHttpClient.post(requestURL, json);
         return ClientGroupRDTO.fromJson(httpResult);

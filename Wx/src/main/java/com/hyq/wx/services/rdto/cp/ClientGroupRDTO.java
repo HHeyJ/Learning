@@ -1,7 +1,7 @@
 package com.hyq.wx.services.rdto.cp;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import com.hyq.wx.services.properties.WxCpProperties;
 import com.hyq.wx.services.rdto.wx.WxBaseRDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -118,7 +118,7 @@ public class ClientGroupRDTO extends WxBaseRDTO {
         if (StringUtils.isEmpty(json)) {
             return null;
         }
-        return new GsonBuilder().create().fromJson(json,ClientGroupRDTO.class);
+        return WxCpProperties.GsonInstance.fromJson(json,ClientGroupRDTO.class);
     }
 
 

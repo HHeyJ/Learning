@@ -48,17 +48,16 @@ public class WxHttpClient {
                 .setSocketTimeout(1000).setConnectTimeout(1000).build();
         httpGet.setConfig(requestConfig);
         // 获取响应
-        String responseContent = "";
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-            responseContent = new BasicResponseHandler().handleResponse(response);
+            String responseContent = new BasicResponseHandler().handleResponse(response);
             // TODO hu 判断错误码
-
+            return responseContent;
         } catch (IOException e) {
 
         } finally {
             httpGet.releaseConnection();
         }
-        return responseContent;
+        throw new RuntimeException();
     }
 
     /**
@@ -82,16 +81,16 @@ public class WxHttpClient {
             httpPost.setEntity(entity);
         }
 
-        String responseContent = "";
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 
-            responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
+            String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
             // TODO hu 判断错误码
+            return responseContent;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             httpPost.releaseConnection();
         }
-        return responseContent;
+        throw new RuntimeException();
     }
 }
