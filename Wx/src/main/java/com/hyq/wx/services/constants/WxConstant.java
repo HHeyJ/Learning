@@ -68,9 +68,9 @@ public final class WxConstant {
      */
     public static final String clientGroupSecret = "3-8w__SCdNWHLYlhhLoMZ6iEiFOVBG9mWfvWriXgANo";
     /**
-     * 企业微信AccessToken缓存Key
+     * 企业微信AccessToken缓存Key前缀
      */
-    public static final String qmTokenKey = "qmTokenKey" + corPid;
+    public static final String qmCpTokenPreKey = "qmCpTokenPreKey" + corPid;
   }
 
 }

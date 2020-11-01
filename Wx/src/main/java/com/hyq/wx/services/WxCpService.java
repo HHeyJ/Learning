@@ -42,7 +42,7 @@ public class WxCpService implements Serializable {
      */
     public String getAccessToken() {
         // TODO hu
-        return "l8PRHwakC69aS5GgfY2NEL0mXIlrs0cYVHwsOii8P4MI5CYY1nE4uVyrUmqYA-Ewbs0KTJyYka4yQh3QCrJr8bKQXUxYMbM88m0Q2r50xTXO6No-RSrBOOogiCNikTzvrKB5EV3CcC1_zxIm4DTjiUK8jeNVqpyE2UHwL3N20ftwnHfW_iO4NtDGJHEP5fE-kPHQbMgdqtWoCgIlssXFRA";
+        return "2ZjcVztg5d8UAvL1ikANzKyii0P6NWgbuu9cpD0Ii8kg8pHmMF-Vl0C08Y-uSKB_YGz_UsKXq3AlDyX2N8YGqAmG_ech6fi-TFPvRI5Eu0VhfZsJu3Ynwjvyvct3QDPp2ldDiVQh5ZnmE7cJsE9n49BOHV64ssB3HsFzI1rDMwvP1T0JZ4WcLipGcaJvFo2InBAEXAE25iKNIeQwTWtmGQ";
 
     }
 
